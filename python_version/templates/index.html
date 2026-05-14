@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="relative min-h-screen cyber-bg overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+    <div class="absolute top-1/2 right-0 w-96 h-96 bg-yellow-600 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/3 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+
+    <div class="relative z-10 flex flex-col items-center justify-start min-h-screen p-4 sm:p-8 md:p-12 lg:p-24">
+        <div class="text-center w-full max-w-4xl flex flex-col items-center gap-4 sm:gap-6 md:gap-8">
+            <!-- Header -->
+            <div class="mb-4 sm:mb-6">
+                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 bg-clip-text text-transparent neon-glow tracking-wider">MonoDex</h1>
+            </div>
+            <p class="text-xs sm:text-sm md:text-base text-transparent bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text font-mono tracking-widest uppercase">━━ Pokemon Card Search Engine ━━</p>
+
+            <!-- Search Form -->
+            <div class="w-full flex justify-center">
+                <form id="searchForm" class="w-full max-w-2xl" onsubmit="handleSearch(event)">
+                    <div class="flex gap-3 flex-col sm:flex-row">
+                        <!-- Search Type Dropdown -->
+                        <select id="searchType" class="px-4 py-3 bg-black border border-purple-500 rounded-lg text-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 font-mono text-sm uppercase tracking-wider disabled:opacity-50 glow-border appearance-none bg-no-repeat pr-8"
+                            style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23fcd34d%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
+                            <option value="name" class="bg-black text-yellow-300">POKEMON NAME</option>
+                            <option value="illustrator" class="bg-black text-yellow-300">ILLUSTRATOR</option>
+                        </select>
+
+                        <!-- Search Input & Button -->
+                        <div class="flex gap-3 flex-1 glow-border p-1 rounded-lg bg-black/50 backdrop-blur-sm">
+                            <input type="text" id="searchTerm" placeholder="ENTER POKEMON NAME..." class="flex-1 px-4 py-3 bg-black border-0 text-yellow-300 placeholder-purple-500/50 focus:outline-none font-mono text-sm uppercase tracking-wider disabled:opacity-50" />
+                            <button type="submit" id="searchBtn" class="px-6 py-3 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black font-black rounded-md hover:shadow-[0_0_20px_rgba(250,204,21,0.8)] transition-all duration-300 disabled:opacity-50 uppercase tracking-wider text-sm">
+                                SCAN
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Container -->
+            <div id="resultsContainer" class="w-full"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let isLoading = false;
+
+    function updateSearchPlaceholder() {
+        const searchType = document.getElementById('searchType').value;
+        const searchInput = document.getElementById('searchTerm');
+        searchInput.placeholder = searchType === 'name' ? 'ENTER POKEMON NAME...' : 'ENTER ILLUSTRATOR NAME...';
+    }
+
+    document.getElementById('searchType').addEventListener('change', updateSearchPlaceholder);
+
+    async function handleSearch(event) {
+        event.preventDefault();
+        
+        const searchTerm = document.getElementById('searchTerm').value.trim();
+        const searchType = document.getElementById('searchType').value;
+        
+        if (!searchTerm) return;
+        
+        isLoading = true;
+        updateUI();
+
+        try {
+            // Simulate scanning delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ searchTerm, searchType })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                displayError(error.error || 'Search failed');
+            } else {
+                const result = await response.json();
+                displayCards(result.cards);
+            }
+        } catch (error) {
+            displayError(error.message || 'Search failed');
+        } finally {
+            isLoading = false;
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        const btn = document.getElementById('searchBtn');
+        const input = document.getElementById('searchTerm');
+        const select = document.getElementById('searchType');
+
+        if (isLoading) {
+            btn.textContent = 'SCANNING...';
+            btn.disabled = true;
+            input.disabled = true;
+            select.disabled = true;
+        } else {
+            btn.textContent = 'SCAN';
+            btn.disabled = false;
+            input.disabled = false;
+            select.disabled = false;
+        }
+    }
+
+    function displayError(error) {
+        document.getElementById('resultsContainer').innerHTML = `
+            <div class="flex justify-center items-center py-12">
+                <div class="text-pink-400 font-mono text-sm tracking-wider">⚠ ERROR: ${error}</div>
+            </div>
+        `;
+    }
+
+    function displayCards(cards) {
+        if (isLoading) {
+            document.getElementById('resultsContainer').innerHTML = `
+                <div class="flex justify-center items-center py-12">
+                    <div class="text-purple-400 font-mono text-sm tracking-widest">▓▒░ SCANNING DATABASE ░▒▓</div>
+                </div>
+            `;
+            return;
+        }
+
+        if (cards.length === 0) {
+            document.getElementById('resultsContainer').innerHTML = `
+                <div class="w-full mt-12 flex justify-center items-center py-12">
+                    <div class="text-center space-y-4">
+                        <div class="text-pink-400 font-mono text-lg tracking-widest uppercase font-black scanlines">
+                            ⟨ POKEMON NOT RECOGNISED ⟩
+                        </div>
+                        <div class="text-purple-400 font-mono text-xs tracking-wider opacity-60">
+                            [ERROR 404: DATABASE QUERY RETURNED ZERO RESULTS]
+                        </div>
+                        <div class="text-yellow-300 font-mono text-2xl flicker-text">
+                            ▮
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="w-full mt-12">
+                <h2 class="text-xl md:text-2xl font-black text-transparent bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text mb-8 font-mono tracking-wider">
+                    ╔══ ${cards.length} CARD${cards.length !== 1 ? 'S' : ''} FOUND ══╗
+                </h2>
+                <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-max">
+        `;
+
+        cards.forEach(card => {
+            html += `
+                <div class="card-glow rounded-lg overflow-hidden bg-black/80 border border-purple-500/50 backdrop-blur-sm">
+                    ${card.image ? `<img src="${card.image}" alt="${card.name}" class="card-image w-full bg-gray-900" onerror="this.style.display='none'">` : ''}
+                    <div class="p-3">
+                        <h3 class="text-sm font-bold text-yellow-300 truncate">${card.name}</h3>
+                        <p class="text-xs text-purple-400 truncate">${card.setName}</p>
+                        ${card.hp ? `<p class="text-xs text-pink-400 mt-1">HP: ${card.hp}</p>` : ''}
+                        ${card.types && card.types.length > 0 ? `<p class="text-xs text-cyan-400 mt-1">${card.types.join(', ')}</p>` : ''}
+                        ${card.rarity ? `<p class="text-xs text-yellow-200 mt-1">Rarity: ${card.rarity}</p>` : ''}
+                        ${card.variants && card.variants.length > 0 ? `<p class="text-xs text-green-400 mt-1">Variants: ${card.variants.join(', ')}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
+        `;
+
+        document.getElementById('resultsContainer').innerHTML = html;
+    }
+</script>
