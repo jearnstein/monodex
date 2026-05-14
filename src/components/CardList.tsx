@@ -80,25 +80,29 @@ export default function CardList({ cards, isLoading, error, hasSearched = false 
         {cards.map((card) => (
           <div
             key={card.id}
-            className="bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] glow-border group"
+            className="bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 hover:shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] hover:scale-125 hover:overflow-visible z-10 hover:z-50 hover:border-2 hover:border-yellow-300 glow-border group relative origin-center"
           >
             {card.image && !failedImages.has(card.id) ? (
-              <div className="h-72 bg-gradient-to-br from-purple-900 to-black flex items-center justify-center overflow-hidden relative">
-                <img
-                  src={card.image}
-                  alt={card.name}
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  onError={() => handleImageError(card.id)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40"></div>
+              <div className="w-full flex justify-center py-3">
+                <div className="bg-gradient-to-br from-purple-900 to-black flex items-center justify-center overflow-hidden hover:overflow-visible relative w-4/5" style={{ aspectRatio: '2.5 / 3.5' }}>
+                  <img
+                    src={card.image}
+                    alt={card.name}
+                    className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                    onError={() => handleImageError(card.id)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
               </div>
             ) : (
-              <div className="h-72 bg-gradient-to-br from-purple-950 via-black to-purple-950 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20" style={{
-                  backgroundImage: 'radial-gradient(circle at 20% 50%, purple 0%, transparent 50%), radial-gradient(circle at 80% 80%, pink 0%, transparent 50%)'
-                }}></div>
-                <span className="text-purple-400 text-center px-2 text-xs font-mono tracking-wider relative z-10">NO IMAGE DATA</span>
+              <div className="w-full flex justify-center py-3">
+                <div className="bg-gradient-to-br from-purple-950 via-black to-purple-950 flex items-center justify-center relative overflow-hidden hover:overflow-visible w-4/5" style={{ aspectRatio: '2.5 / 3.5' }}>
+                  <div className="absolute inset-0 opacity-20" style={{
+                    backgroundImage: 'radial-gradient(circle at 20% 50%, purple 0%, transparent 50%), radial-gradient(circle at 80% 80%, pink 0%, transparent 50%)'
+                  }}></div>
+                  <span className="text-purple-400 text-center px-2 text-xs font-mono tracking-wider relative z-10">NO IMAGE DATA</span>
+                </div>
               </div>
             )}
             <div className="p-4 border-t border-purple-500/30">
