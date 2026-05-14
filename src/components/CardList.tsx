@@ -1,7 +1,7 @@
 'use client'
 
 import { PokemonCard } from '@/types'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface CardListProps {
   cards: PokemonCard[]

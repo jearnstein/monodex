@@ -129,15 +129,21 @@ export default function Home() {
               {/* Card Details Toggle */}
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded font-mono text-xs uppercase tracking-wider transition-all duration-200 bg-black/50 border border-purple-500/50 whitespace-nowrap ${
+                className={`p-1.5 sm:p-2 rounded transition-all duration-200 ${
                   showDetails
-                    ? 'bg-yellow-400 text-black font-bold shadow-lg border-yellow-400'
-                    : 'text-yellow-300 hover:bg-purple-500/30'
+                    ? 'bg-yellow-400 shadow-lg'
+                    : 'bg-transparent hover:bg-purple-500/30'
                 }`}
-                title="Toggle Card Details"
+                title="Display Card Data"
               >
-                <span className="hidden sm:inline">{showDetails ? '✓ Details' : '✗ Details'}</span>
-                <span className="sm:hidden">{showDetails ? '✓' : '✗'}</span>
+                <svg className={`w-4 h-4 ${showDetails ? 'text-black' : 'text-yellow-300'}`} fill="currentColor" viewBox="0 0 24 24">
+                  {/* Document/Info Icon */}
+                  <rect x="4" y="2" width="16" height="20" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                  <line x1="8" y1="6" x2="16" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <line x1="8" y1="14" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="19" r="1" fill="currentColor"/>
+                </svg>
               </button>
             </div>
           )}
