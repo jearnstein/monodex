@@ -98,10 +98,10 @@ export default function CardList({ cards, isLoading, error, hasSearched = false 
           <div
             key={card.id}
             onClick={() => handleCardClick(card.id)}
-            className={`bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 z-10 glow-border group relative origin-center cursor-pointer
+            className={`bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 z-10 glow-border group cursor-pointer
               ${isMobile && expandedCardId === card.id
-                ? 'scale-100 sm:scale-100 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 sm:w-96 shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] border-2 border-yellow-300'
-                : 'hover:shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] hover:scale-100 hover:z-50 hover:border-2 hover:border-yellow-300 hover:overflow-visible'
+                ? 'fixed top-1/2 left-1/2 z-50 w-11/12 max-h-[90vh] -translate-x-1/2 -translate-y-1/2 shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] border-2 border-yellow-300 overflow-y-auto'
+                : 'relative origin-center hover:shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] hover:scale-100 hover:z-50 hover:border-2 hover:border-yellow-300 hover:overflow-visible'
               }
             `}
           >
