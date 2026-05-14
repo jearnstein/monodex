@@ -1,7 +1,7 @@
 'use client'
 
 import { PokemonCard } from '@/types'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface CardListProps {
   cards: PokemonCard[]
@@ -12,9 +12,25 @@ interface CardListProps {
 
 export default function CardList({ cards, isLoading, error, hasSearched = false }: CardListProps) {
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleImageError = (cardId: string) => {
     setFailedImages((prev) => new Set(prev).add(cardId))
+  }
+
+  const handleCardClick = (cardId: string) => {
+    if (isMobile) {
+      setExpandedCardId(expandedCardId === cardId ? null : cardId)
+    }
   }
 
   if (isLoading) {
@@ -72,32 +88,39 @@ export default function CardList({ cards, isLoading, error, hasSearched = false 
   }
 
   return (
-    <div className="w-full mt-12">
-      <h2 className="text-xl md:text-2xl font-black text-transparent bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text mb-8 font-mono tracking-wider">
+    <div className="w-full mt-8 sm:mt-12 px-2 sm:px-0">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-black text-transparent bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text mb-6 sm:mb-8 font-mono tracking-wider text-center">
         ╔══ {cards.length} CARD{cards.length !== 1 ? 'S' : ''} FOUND ══╗
       </h2>
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 auto-rows-max">
+      {/* Mobile-first responsive grid: 1 col on mobile, 2 on sm, 3 on md, 4 on lg, 5 on xl */}
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
         {cards.map((card) => (
           <div
             key={card.id}
-            className="bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 hover:shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] hover:scale-125 hover:overflow-visible z-10 hover:z-50 hover:border-2 hover:border-yellow-300 glow-border group relative origin-center"
+            onClick={() => handleCardClick(card.id)}
+            className={`bg-black rounded-lg overflow-hidden shadow-xl transition-all duration-300 z-10 glow-border group relative origin-center cursor-pointer
+              ${isMobile && expandedCardId === card.id
+                ? 'scale-100 sm:scale-100 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-11/12 sm:w-96 shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] border-2 border-yellow-300'
+                : 'hover:shadow-[inset_0_0_10px_rgba(253,211,77,0.6),0_0_50px_rgba(253,211,77,0.8),0_0_30px_rgba(168,85,247,0.6)] hover:scale-100 hover:z-50 hover:border-2 hover:border-yellow-300 hover:overflow-visible'
+              }
+            `}
           >
             {card.image && !failedImages.has(card.id) ? (
-              <div className="w-full flex justify-center py-3">
-                <div className="bg-gradient-to-br from-purple-900 to-black flex items-center justify-center overflow-hidden hover:overflow-visible relative w-4/5" style={{ aspectRatio: '2.5 / 3.5' }}>
+              <div className="w-full flex justify-center py-2 sm:py-3">
+                <div className={`bg-gradient-to-br from-purple-900 to-black flex items-center justify-center overflow-hidden relative ${isMobile && expandedCardId === card.id ? 'overflow-visible w-full' : 'hover:overflow-visible w-4/5'}`} style={{ aspectRatio: '2.5 / 3.5' }}>
                   <img
                     src={card.image}
                     alt={card.name}
-                    className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-300"
+                    className={`h-full w-full object-contain transition-transform duration-300 ${isMobile && expandedCardId === card.id ? 'scale-100' : 'group-hover:scale-110'}`}
                     loading="lazy"
                     onError={() => handleImageError(card.id)}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"></div>
+                  <div className={`absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent transition-opacity duration-300 ${isMobile && expandedCardId === card.id ? 'opacity-20' : 'opacity-40 group-hover:opacity-20'}`}></div>
                 </div>
               </div>
             ) : (
-              <div className="w-full flex justify-center py-3">
-                <div className="bg-gradient-to-br from-purple-950 via-black to-purple-950 flex items-center justify-center relative overflow-hidden hover:overflow-visible w-4/5" style={{ aspectRatio: '2.5 / 3.5' }}>
+              <div className="w-full flex justify-center py-2 sm:py-3">
+                <div className={`bg-gradient-to-br from-purple-950 via-black to-purple-950 flex items-center justify-center relative overflow-hidden ${isMobile && expandedCardId === card.id ? 'overflow-visible w-full' : 'hover:overflow-visible w-4/5'}`} style={{ aspectRatio: '2.5 / 3.5' }}>
                   <div className="absolute inset-0 opacity-20" style={{
                     backgroundImage: 'radial-gradient(circle at 20% 50%, purple 0%, transparent 50%), radial-gradient(circle at 80% 80%, pink 0%, transparent 50%)'
                   }}></div>
@@ -105,26 +128,34 @@ export default function CardList({ cards, isLoading, error, hasSearched = false 
                 </div>
               </div>
             )}
-            <div className="p-4 border-t border-purple-500/30">
-              <h3 className="font-bold text-gray-100 truncate text-sm mb-2 tracking-wider">{card.name}</h3>
-              <div className="space-y-1 text-xs">
+            <div className="p-3 sm:p-4 border-t border-purple-500/30">
+              <h3 className="font-bold text-gray-100 truncate text-xs sm:text-sm mb-1 sm:mb-2 tracking-wider">{card.name}</h3>
+              <div className="space-y-0.5 sm:space-y-1 text-xs">
                 {card.setName && (
-                  <p className="text-cyan-300 font-mono truncate">◆ SET: {card.setName}</p>
+                  <p className="text-cyan-300 font-mono truncate text-xs">◆ SET: {card.setName}</p>
                 )}
                 {card.hp && (
-                  <p className="text-yellow-300 font-mono">◆ HP: <span className="font-bold">{card.hp}</span></p>
+                  <p className="text-yellow-300 font-mono text-xs">◆ HP: <span className="font-bold">{card.hp}</span></p>
                 )}
                 {card.types && card.types.length > 0 && (
-                  <p className="text-purple-300 font-mono truncate">▲ TYPE: {card.types.join(' / ')}</p>
+                  <p className="text-purple-300 font-mono truncate text-xs">▲ TYPE: {card.types.join(' / ')}</p>
                 )}
                 {card.rarity && (
-                  <p className="text-pink-300 font-mono truncate">★ {card.rarity}</p>
+                  <p className="text-pink-300 font-mono truncate text-xs">★ {card.rarity}</p>
                 )}
                 {card.variants && card.variants.length > 0 && (
-                  <p className="text-green-300 font-mono truncate">◊ VAR: {card.variants.join(', ')}</p>
+                  <p className="text-green-300 font-mono truncate text-xs">◊ VAR: {card.variants.join(', ')}</p>
                 )}
               </div>
             </div>
+
+            {/* Mobile overlay backdrop */}
+            {isMobile && expandedCardId === card.id && (
+              <div 
+                className="fixed inset-0 bg-black/70 z-40"
+                onClick={() => setExpandedCardId(null)}
+              ></div>
+            )}
           </div>
         ))}
       </div>
